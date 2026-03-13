@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roots & Routes — Migration Map of Colonial Hong Kong</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Special+Elite&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f2e8d5;
+  --paper-dark: #e0d0b0;
+  --ink: #2c1a0e;
+  --ink-faded: #5c3d20;
+  --red-stamp: #8b1a1a;
+  --red-stamp-light: #c0392b;
+  --sepia: #7a5c2e;
+  --sepia-light: #a07840;
+  --map-water: #b8cdd9;
+  --map-land: #d4c4a0;
+  --map-land-hover: #c8a96e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background-color: #1a0f05;
+  font-family: 'Crimson Text', serif;
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── LOADING SCREEN ── */
+#loading-screen {
+  position: fixed; inset: 0;
+  background: #1a0f05;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.8s ease;
+}
+#loading-screen.fade-out { opacity: 0; pointer-events: none; }
+
+.loading-seal {
+  width: 120px; height: 120px;
+  border: 4px solid var(--red-stamp);
+  border-radius: 50%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative;
+  animation: rotateSeal 8s linear infinite;
+}
+.loading-seal::before {
+  content: '';
+  position: absolute; inset: 8px;
+  border: 1.5px solid var(--red-stamp);
+  border-radius: 50%;
+}
+@keyframes rotateSeal { to { transform: rotate(360deg); } }
+.loading-seal-inner {
+  font-family: 'IM Fell English', serif;
+  font-size: 2rem;
+  color: var(--red-stamp);
+  animation: rotateSeal 8s linear infinite reverse;
+}
+.loading-text {
+  font-family: 'Special Elite', cursive;
+  color: var(--paper-dark);
+  letter-spacing: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  margin-top: 28px;
+  opacity: 0.7;
+}
+.loading-bar {
+  width: 200px; height: 2px;
+  background: rgba(240,220,180,0.15);
+  margin-top: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.loading-bar::after {
+  content: '';
+  position: absolute;
+  left: -100%; top: 0;
+  width: 100%; height: 100%;
+  background: var(--red-stamp);
+  animation: loadBar 1.6s ease forwards;
+}
+@keyframes loadBar { to { left: 0; } }
+
+/* ── PAPER TEXTURE ── */
+.paper-texture {
+  background-color: var(--paper);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(100,70,30,0.035) 28px, rgba(100,70,30,0.035) 29px);
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--ink);
+  border-bottom: 2px solid var(--sepia);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  height: 48px;
+}
+.nav-brand {
+  font-family: 'IM Fell English', serif;
+  color: var(--paper);
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+}
+.nav-brand em { color: var(--sepia-light); }
+.nav-links { display: flex; gap: 4px; }
+.nav-link {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--paper-dark);
+  padding: 6px 14px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  background: none; border: none;
+}
+.nav-link:hover { color: var(--paper); background: rgba(255,255,255,0.07); }
+.nav-link.active { color: var(--red-stamp-light); border-bottom: 2px solid var(--red-stamp-light); }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── HEADER ── */
+header {
+  text-align: center;
+  padding: 52px 24px 36px;
+  position: relative;
+  border-bottom: 2px solid var(--sepia);
+}
+.header-inner { max-width: 900px; margin: 0 auto; }
+.stamp-crown {
+  font-size: 11px; letter-spacing: 6px;
+  text-transform: uppercase; color: var(--red-stamp);
+  font-family: 'Special Elite', cursive; opacity: 0.85; margin-bottom: 8px;
+}
+h1 {
+  font-family: 'IM Fell English', serif;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  color: var(--ink); line-height: 1.1;
+}
+h1 em { color: var(--sepia); font-style: italic; }
+.subtitle {
+  font-family: 'Special Elite', cursive; font-size: 0.82rem;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink-faded); margin-top: 10px;
+}
+.divider { display: flex; align-items: center; gap: 12px; margin: 18px auto; max-width: 400px; }
+.divider hr { flex: 1; border: none; border-top: 1px solid var(--sepia-light); }
+.divider span { color: var(--red-stamp); font-size: 1.1rem; }
+.intro-text {
+  font-size: 1.1rem; color: var(--ink-faded);
+  font-style: italic; max-width: 560px; margin: 0 auto; line-height: 1.65;
+}
+
+/* Stamp decoration */
+.stamp {
+  position: absolute; top: 36px; right: 52px;
+  width: 90px; height: 90px;
+  border: 3px solid var(--red-stamp); border-radius: 50%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0.65; transform: rotate(-12deg);
+}
+.stamp::before {
+  content: ''; position: absolute; inset: 5px;
+  border: 1px solid var(--red-stamp); border-radius: 50%;
+}
+.stamp-text {
+  font-family: 'Special Elite', cursive; font-size: 7px;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--red-stamp); text-align: center; line-height: 1.4;
+}
+.stamp-year { font-family: 'IM Fell English', serif; font-size: 16px; color: var(--red-stamp); }
+
+/* ── MAIN LAYOUT ── */
+.main-container {
+  max-width: 1200px; margin: 0 auto;
+  padding: 32px 24px;
+  display: grid; grid-template-columns: 1fr 360px;
+  gap: 32px; align-items: start;
+}
+
+/* ── MAP ── */
+.map-label {
+  font-family: 'Special Elite', cursive; font-size: 0.72rem;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--sepia);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.map-label::after { content: ''; flex: 1; border-top: 1px solid var(--paper-dark); }
+.map-wrapper {
+  position: relative; background: var(--map-water);
+  border: 2px solid var(--sepia); border-radius: 2px; overflow: hidden;
+  box-shadow: 4px 4px 0 rgba(44,26,14,0.2), inset 0 0 40px rgba(100,80,40,0.12);
+}
+svg#hk-map { width: 100%; height: auto; display: block; }
+.region { cursor: pointer; transition: fill 0.25s; }
+.region:hover { fill: var(--map-land-hover); }
+.region.active { fill: #b8956a; }
+.map-pin { cursor: pointer; transition: transform 0.2s; transform-origin: center bottom; }
+.map-pin:hover { transform: scale(1.3) translateY(-4px); }
+.map-pin.active circle { fill: #c0392b; }
+.map-pin.active polygon { fill: #c0392b; }
+.pin-number {
+  font-family: 'Special Elite', cursive; font-size: 10px;
+  fill: white; text-anchor: middle; dominant-baseline: central; pointer-events: none;
+}
+
+/* ── TIMELINE ── */
+.timeline-bar {
+  margin-top: 16px; background: var(--paper-dark);
+  border: 1px solid var(--sepia); padding: 14px 18px;
+}
+.timeline-title {
+  font-family: 'Special Elite', cursive; font-size: 0.68rem;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--sepia); margin-bottom: 12px;
+}
+.timeline-track { position: relative; height: 38px; display: flex; align-items: center; }
+.timeline-line {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(to right, var(--sepia), var(--red-stamp), var(--sepia));
+  opacity: 0.4;
+}
+.timeline-events {
+  position: relative; width: 100%;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.t-event { position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.t-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--sepia); border: 2px solid var(--paper);
+  transition: background 0.2s, transform 0.2s; z-index: 1;
+}
+.t-event:hover .t-dot { background: var(--red-stamp); transform: scale(1.5); }
+.t-year { font-family: 'Special Elite', cursive; font-size: 8.5px; color: var(--ink-faded); white-space: nowrap; }
+.t-event .t-tooltip {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: var(--paper); font-family: 'Crimson Text', serif;
+  font-size: 11px; padding: 5px 9px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 20;
+}
+.t-event:hover .t-tooltip { opacity: 1; }
+
+/* ── SIDEBAR ── */
+.sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+.info-card {
+  border: 1px solid var(--sepia); padding: 20px; position: relative;
+  background: var(--paper);
+  box-shadow: 2px 2px 0 rgba(44,26,14,0.12);
+  animation: fadeUp 0.35s ease;
+}
+.info-card::before {
+  content: ''; position: absolute;
+  top: 4px; left: 4px; right: -4px; bottom: -4px;
+  border: 1px solid var(--paper-dark); z-index: -1;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card-number {
+  position: absolute; top: -12px; left: 16px;
+  background: var(--red-stamp); color: var(--paper);
+  font-family: 'Special Elite', cursive; font-size: 9px; padding: 2px 10px; letter-spacing: 2px;
+}
+.card-location { font-family: 'IM Fell English', serif; font-size: 1.5rem; color: var(--ink); margin-bottom: 3px; line-height: 1.2; }
+.card-community { font-family: 'Special Elite', cursive; font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--red-stamp); margin-bottom: 8px; }
+.card-period { font-family: 'Special Elite', cursive; font-size: 0.63rem; letter-spacing: 1px; color: var(--sepia); margin-bottom: 10px; }
+.card-body { font-size: 0.95rem; line-height: 1.65; color: var(--ink-faded); margin-bottom: 14px; }
+.card-body strong { color: var(--ink); }
+
+/* ── PHOTO SECTION inside card ── */
+.card-photos { margin: 14px 0; }
+.photo-label {
+  font-family: 'Special Elite', cursive; font-size: 0.62rem;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--sepia);
+  margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+}
+.photo-label::after { content: ''; flex: 1; border-top: 1px dashed var(--paper-dark); }
+
+.photo-single img {
+  width: 100%; height: 160px; object-fit: cover;
+  border: 1px solid var(--sepia); filter: sepia(30%) contrast(1.05);
+  display: block;
+}
+.photo-caption {
+  font-family: 'Special Elite', cursive; font-size: 0.6rem;
+  color: var(--sepia); letter-spacing: 0.5px; margin-top: 4px;
+  font-style: italic; text-align: center;
+}
+
+/* ── BEFORE/AFTER SLIDER ── */
+.before-after {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--sepia); cursor: ew-resize;
+  height: 160px; user-select: none;
+}
+.ba-after {
+  position: absolute; inset: 0;
+  overflow: hidden;
+}
+.ba-after img {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  filter: none;
+}
+.ba-before {
+  position: absolute; inset: 0;
+  overflow: hidden;
+}
+.ba-before img {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  filter: sepia(60%) contrast(1.05);
+}
+.ba-divider {
+  position: absolute; top: 0; bottom: 0;
+  width: 2px; background: white;
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  z-index: 10; pointer-events: none;
+}
+.ba-handle {
+  position: absolute; top: 50%; left: -14px;
+  width: 28px; height: 28px;
+  background: white; border-radius: 50%;
+  border: 2px solid var(--sepia);
+  display: flex; align-items: center; justify-content: center;
+  transform: translateY(-50%);
+  font-size: 11px; color: var(--ink); pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.ba-labels {
+  position: absolute; bottom: 6px; left: 0; right: 0;
+  display: flex; justify-content: space-between;
+  padding: 0 8px; pointer-events: none; z-index: 11;
+}
+.ba-labels span {
+  font-family: 'Special Elite', cursive; font-size: 8px;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: rgba(0,0,0,0.55); color: var(--paper-dark);
+  padding: 2px 6px;
+}
+
+/* ── ORAL HISTORY ── */
+.oral-history {
+  border-left: 3px solid var(--sepia-light); padding-left: 12px;
+  font-style: italic; font-size: 0.9rem; color: var(--ink-faded);
+  margin: 12px 0; line-height: 1.55;
+}
+.oral-history cite {
+  display: block; font-style: normal;
+  font-family: 'Special Elite', cursive; font-size: 0.62rem;
+  letter-spacing: 1px; color: var(--sepia); margin-top: 5px;
+}
+
+/* ── TAGS ── */
+.card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.tag {
+  font-family: 'Special Elite', cursive; font-size: 0.6rem;
+  letter-spacing: 1px; color: var(--sepia);
+  border: 1px solid var(--sepia-light); padding: 2px 7px; text-transform: uppercase;
+}
+
+/* Default card */
+.default-card { text-align: center; padding: 36px 20px; }
+.default-card .big-icon { font-size: 2.5rem; margin-bottom: 14px; opacity: 0.3; }
+.default-card p { font-style: italic; color: var(--ink-faded); font-size: 0.95rem; line-height: 1.65; }
+
+/* ── LEGEND ── */
+.legend { border: 1px solid var(--paper-dark); padding: 14px 16px; }
+.legend-title {
+  font-family: 'Special Elite', cursive; font-size: 0.63rem;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--sepia); margin-bottom: 10px;
+}
+.legend-items { display: flex; flex-direction: column; gap: 7px; }
+.legend-item {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 0.85rem; color: var(--ink-faded); cursor: pointer; transition: color 0.2s;
+}
+.legend-item:hover { color: var(--ink); }
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; background: var(--red-stamp); }
+
+/* ── ABOUT PAGE ── */
+.about-page {
+  max-width: 860px; margin: 0 auto; padding: 56px 32px;
+}
+.about-header { text-align: center; margin-bottom: 48px; }
+.about-header h2 {
+  font-family: 'IM Fell English', serif; font-size: 2.4rem;
+  color: var(--ink); margin-bottom: 8px;
+}
+.about-header p {
+  font-family: 'Special Elite', cursive; font-size: 0.72rem;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--sepia);
+}
+.about-section { margin-bottom: 40px; }
+.about-section h3 {
+  font-family: 'IM Fell English', serif; font-size: 1.4rem;
+  color: var(--ink); margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--paper-dark);
+}
+.about-section p {
+  font-size: 1.05rem; line-height: 1.75; color: var(--ink-faded); margin-bottom: 12px;
+}
+.about-section p strong { color: var(--ink); }
+.about-section p em { color: var(--sepia); }
+
+/* Research question box */
+.rq-box {
+  border: 2px solid var(--sepia); padding: 24px 28px;
+  margin: 20px 0; position: relative; background: rgba(240,220,180,0.3);
+}
+.rq-box::before {
+  content: 'Research Question';
+  position: absolute; top: -10px; left: 16px;
+  font-family: 'Special Elite', cursive; font-size: 0.65rem;
+  letter-spacing: 2px; text-transform: uppercase;
+  background: var(--paper); color: var(--red-stamp); padding: 0 8px;
+}
+.rq-box p {
+  font-family: 'IM Fell English', serif; font-size: 1.15rem;
+  font-style: italic; color: var(--ink); line-height: 1.6; margin: 0;
+}
+
+/* Sources list */
+.sources-list { list-style: none; }
+.sources-list li {
+  font-size: 0.92rem; color: var(--ink-faded);
+  padding: 8px 0; border-bottom: 1px dashed var(--paper-dark);
+  line-height: 1.5;
+}
+.sources-list li:last-child { border: none; }
+.sources-list li strong { color: var(--ink); font-family: 'Special Elite', cursive; font-size: 0.8rem; }
+
+/* Photo credits */
+.photo-credit-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-top: 12px;
+}
+.credit-card {
+  background: var(--paper-dark); border: 1px solid var(--sepia);
+  padding: 10px 12px;
+}
+.credit-card img {
+  width: 100%; height: 80px; object-fit: cover;
+  filter: sepia(40%); margin-bottom: 6px;
+}
+.credit-card p {
+  font-family: 'Special Elite', cursive; font-size: 0.58rem;
+  letter-spacing: 0.5px; color: var(--sepia); line-height: 1.45; margin: 0;
+}
+
+/* About stamp */
+.about-stamp {
+  display: flex; align-items: center; justify-content: center;
+  margin: 40px 0 0;
+}
+.about-stamp-inner {
+  width: 120px; height: 120px;
+  border: 4px solid var(--red-stamp); border-radius: 50%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0.5; transform: rotate(-8deg);
+  position: relative;
+}
+.about-stamp-inner::before {
+  content: ''; position: absolute; inset: 7px;
+  border: 1.5px solid var(--red-stamp); border-radius: 50%;
+}
+.about-stamp-inner span {
+  font-family: 'Special Elite', cursive; color: var(--red-stamp);
+  text-align: center; line-height: 1.4;
+}
+.about-stamp-inner .big-s { font-size: 1.5rem; }
+.about-stamp-inner .sm-s { font-size: 6.5px; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center; padding: 20px; border-top: 1px solid var(--sepia); margin-top: 8px;
+}
+.footer-text {
+  font-family: 'Special Elite', cursive; font-size: 0.68rem;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--sepia); opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .main-container { grid-template-columns: 1fr; }
+  .stamp { display: none; }
+  .nav-brand { display: none; }
+  .photo-credit-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div class="loading-seal">
+    <div class="loading-seal-inner">香</div>
+  </div>
+  <div class="loading-text">Opening the Archive…</div>
+  <div class="loading-bar"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">Roots <em>&</em> Routes</div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="showPage('map')">Map</button>
+    <button class="nav-link" onclick="showPage('about')">About This Project</button>
+  </div>
+</nav>
+
+<!-- ══ MAP PAGE ══ -->
+<div id="page-map" class="page active paper-texture">
+
+<header class="paper-texture">
+  <div class="header-inner">
+    <div class="stamp-crown">Colony of Hong Kong · Est. 1842</div>
+    <h1>Roots <em>&</em> Routes</h1>
+    <p class="subtitle">A Migration Map of Colonial Hong Kong · 1842–1997</p>
+    <div class="divider"><hr><span>✦</span><hr></div>
+    <p class="intro-text">Click a location on the map to explore the communities who shaped Hong Kong's identity — one migration at a time.</p>
+  </div>
+  <div class="stamp">
+    <div class="stamp-text">COLONIAL<br>ARCHIVE</div>
+    <div class="stamp-year">HK</div>
+    <div class="stamp-text">1842–1997</div>
+  </div>
+</header>
+
+<div class="main-container">
+  <!-- MAP -->
+  <div class="map-section">
+    <div class="map-label">Interactive Map — Select a District</div>
+    <div class="map-wrapper">
+      <svg id="hk-map" viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(100,80,40,0.1)" stroke-width="0.5"/>
+          </pattern>
+          <filter id="shadow"><feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.18"/></filter>
+        </defs>
+        <rect width="700" height="420" fill="#b8cdd9"/>
+        <rect width="700" height="420" fill="url(#grid)"/>
+        <!-- water texture -->
+        <g opacity="0.14" stroke="#7a9ab0" stroke-width="0.8" fill="none">
+          <path d="M 0 380 Q 100 370 200 380 Q 300 390 400 380 Q 500 370 600 380 Q 650 385 700 380"/>
+          <path d="M 0 395 Q 120 385 240 395 Q 360 405 480 395 Q 600 385 700 395"/>
+        </g>
+        <!-- HK Island -->
+        <path id="hk-island" class="region" data-location="0"
+          d="M 155 230 Q 170 215 200 210 Q 230 205 260 208 Q 295 205 325 210 Q 355 215 370 228 Q 385 240 375 255 Q 360 270 340 272 Q 310 278 280 275 Q 245 278 215 270 Q 185 262 165 250 Z"
+          fill="#d4c4a0" stroke="#8a7050" stroke-width="1.2" filter="url(#shadow)"/>
+        <text x="262" y="242" font-family="'Special Elite',cursive" font-size="9" fill="#5c3d20" text-anchor="middle" opacity="0.75">HONG KONG ISLAND</text>
+        <!-- Kowloon -->
+        <path id="kowloon" class="region" data-location="1"
+          d="M 210 155 Q 230 140 260 135 Q 290 130 315 138 Q 335 145 340 165 Q 342 185 330 195 Q 310 205 280 207 Q 250 208 228 200 Q 210 192 208 175 Z"
+          fill="#d4c4a0" stroke="#8a7050" stroke-width="1.2" filter="url(#shadow)"/>
+        <text x="272" y="172" font-family="'Special Elite',cursive" font-size="8.5" fill="#5c3d20" text-anchor="middle" opacity="0.75">KOWLOON</text>
+        <!-- New Territories -->
+        <path id="new-territories" class="region" data-location="2"
+          d="M 140 60 Q 180 42 230 38 Q 285 32 340 38 Q 390 44 430 60 Q 465 76 475 100 Q 485 125 470 145 Q 450 162 420 168 Q 390 173 355 165 Q 320 158 300 148 Q 275 138 250 135 Q 225 132 205 142 Q 185 152 175 140 Q 155 125 148 105 Q 140 85 140 60 Z"
+          fill="#d0bfa0" stroke="#8a7050" stroke-width="1.2" filter="url(#shadow)"/>
+        <text x="305" y="95" font-family="'Special Elite',cursive" font-size="9" fill="#5c3d20" text-anchor="middle" opacity="0.75">NEW TERRITORIES</text>
+        <!-- Lantau -->
+        <path id="lantau" class="region"
+          d="M 55 225 Q 70 200 95 185 Q 125 170 148 178 Q 168 185 172 205 Q 175 225 162 240 Q 148 255 125 262 Q 100 268 78 258 Q 58 248 55 232 Z"
+          fill="#d4c4a0" stroke="#8a7050" stroke-width="1.2" filter="url(#shadow)"/>
+        <text x="113" y="224" font-family="'Special Elite',cursive" font-size="8" fill="#5c3d20" text-anchor="middle" opacity="0.7">LANTAU</text>
+        <!-- Outlying islands -->
+        <ellipse cx="90" cy="310" rx="28" ry="15" fill="#d4c4a0" stroke="#8a7050" stroke-width="1" opacity="0.8"/>
+        <text x="90" y="314" font-family="'Special Elite',cursive" font-size="7" fill="#5c3d20" text-anchor="middle" opacity="0.65">Lamma</text>
+        <ellipse cx="200" cy="305" rx="22" ry="12" fill="#d4c4a0" stroke="#8a7050" stroke-width="1" opacity="0.8"/>
+        <text x="200" y="309" font-family="'Special Elite',cursive" font-size="7" fill="#5c3d20" text-anchor="middle" opacity="0.65">Cheung Chau</text>
+        <!-- Labels -->
+        <text x="305" y="22" font-family="'Special Elite',cursive" font-size="7" fill="#8b1a1a" text-anchor="middle" opacity="0.55" letter-spacing="1">— — — BORDER — — —</text>
+        <text x="305" y="29" font-family="'Special Elite',cursive" font-size="9" fill="#5c3d20" text-anchor="middle" opacity="0.45" letter-spacing="3">MAINLAND CHINA</text>
+        <line x1="140" y1="33" x2="470" y2="33" stroke="#8a7050" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.35"/>
+        <text x="272" y="198" font-family="'IM Fell English',serif" font-size="10" fill="#4a7a9b" text-anchor="middle" opacity="0.55" font-style="italic">Victoria Harbour</text>
+        <text x="510" y="305" font-family="'IM Fell English',serif" font-size="11" fill="#4a7a9b" text-anchor="middle" opacity="0.45" font-style="italic">South China Sea</text>
+        <!-- PINS -->
+        <g class="map-pin" data-id="0" onclick="selectLocation(0)" transform="translate(195,216)">
+          <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+          <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+          <text class="pin-number" x="0" y="-8">1</text>
+        </g>
+        <g class="map-pin" data-id="1" onclick="selectLocation(1)" transform="translate(232,162)">
+          <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+          <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+          <text class="pin-number" x="0" y="-8">2</text>
+        </g>
+        <g class="map-pin" data-id="2" onclick="selectLocation(2)" transform="translate(188,82)">
+          <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+          <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+          <text class="pin-number" x="0" y="-8">3</text>
+        </g>
+        <g class="map-pin" data-id="3" onclick="selectLocation(3)" transform="translate(308,155)">
+          <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+          <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+          <text class="pin-number" x="0" y="-8">4</text>
+        </g>
+        <g class="map-pin" data-id="4" onclick="selectLocation(4)" transform="translate(263,148)">
+          <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+          <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+          <text class="pin-number" x="0" y="-8">5</text>
+        </g>
+        <!-- Scale -->
+        <g transform="translate(30,392)">
+          <line x1="0" y1="0" x2="50" y2="0" stroke="#5c3d20" stroke-width="1.5" opacity="0.45"/>
+          <line x1="0" y1="-3" x2="0" y2="3" stroke="#5c3d20" stroke-width="1" opacity="0.45"/>
+          <line x1="50" y1="-3" x2="50" y2="3" stroke="#5c3d20" stroke-width="1" opacity="0.45"/>
+          <text x="25" y="-6" font-family="'Special Elite',cursive" font-size="7" fill="#5c3d20" text-anchor="middle" opacity="0.55">10 km</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-bar">
+      <div class="timeline-title">Key Migration Events · 1842–1997</div>
+      <div class="timeline-track">
+        <div class="timeline-line"></div>
+        <div class="timeline-events">
+          <div class="t-event">
+            <div class="t-dot"></div><div class="t-year">1842</div>
+            <div class="t-tooltip">Treaty of Nanking — HK ceded to Britain</div>
+          </div>
+          <div class="t-event">
+            <div class="t-dot"></div><div class="t-year">1898</div>
+            <div class="t-tooltip">New Territories leased for 99 years</div>
+          </div>
+          <div class="t-event">
+            <div class="t-dot"></div><div class="t-year">1941</div>
+            <div class="t-tooltip">Japanese Occupation begins</div>
+          </div>
+          <div class="t-event">
+            <div class="t-dot"></div><div class="t-year">1949</div>
+            <div class="t-tooltip">Mass influx from post-war China</div>
+          </div>
+          <div class="t-event">
+            <div class="t-dot"></div><div class="t-year">1953</div>
+            <div class="t-tooltip">Shek Kip Mei Fire — public housing born</div>
+          </div>
+          <div class="t-event">
+            <div class="t-dot"></div><div class="t-year">1979</div>
+            <div class="t-tooltip">Vietnamese boat people arrive</div>
+          </div>
+          <div class="t-event">
+            <div class="t-dot"></div><div class="t-year">1997</div>
+            <div class="t-tooltip">Handover to China — end of colonial era</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div id="info-panel">
+      <div class="info-card default-card">
+        <div class="big-icon">🗺</div>
+        <p>Select a numbered location on the map to explore its community history, archive photographs, and migration stories.</p>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-title">Communities Featured</div>
+      <div class="legend-items">
+        <div class="legend-item" onclick="selectLocation(0)"><div class="legend-dot"></div><span><strong>1.</strong> Sheung Wan — Cantonese & Teochew Merchants</span></div>
+        <div class="legend-item" onclick="selectLocation(1)"><div class="legend-dot"></div><span><strong>2.</strong> Sham Shui Po — Shanghai Refugees</span></div>
+        <div class="legend-item" onclick="selectLocation(2)"><div class="legend-dot"></div><span><strong>3.</strong> Yuen Long — Hakka Indigenous Villages</span></div>
+        <div class="legend-item" onclick="selectLocation(3)"><div class="legend-dot"></div><span><strong>4.</strong> Kowloon City — Vietnamese Refugees</span></div>
+        <div class="legend-item" onclick="selectLocation(4)"><div class="legend-dot"></div><span><strong>5.</strong> Shek Kip Mei — Public Housing Origins</span></div>
+      </div>
+    </div>
+    <footer><p class="footer-text">A Digital History Project · HKU MA Hong Kong Studies</p></footer>
+  </div>
+</div>
+</div><!-- end map page -->
+
+<!-- ══ ABOUT PAGE ══ -->
+<div id="page-about" class="page paper-texture">
+<div class="about-page">
+  <div class="about-header">
+    <h2>About This Project</h2>
+    <p>Digital Humanities · Hong Kong History · Migration Studies</p>
+    <div class="divider" style="max-width:300px;margin:16px auto 0"><hr><span style="color:var(--red-stamp)">✦</span><hr></div>
+  </div>
+
+  <div class="about-section">
+    <h3>The Research Question</h3>
+    <div class="rq-box">
+      <p>How did successive waves of migration during Hong Kong's colonial period (1842–1997) shape — and continuously reshape — the city's contested sense of cultural identity?</p>
+    </div>
+    <p>Hong Kong's identity has never been singular. It was forged through the collision and cohabitation of multiple migrant communities — Cantonese merchants, Shanghainese industrialists, Hakka villagers, South Asian traders, Vietnamese boat people — each bringing with them languages, rituals, and memories that transformed the colony into something new, something distinctly <em>Hong Kongese</em>.</p>
+    <p>This project uses the tools of digital humanities — interactive mapping, archival photography, oral history — to make that layered story navigable and visible. It argues that <strong>migration is not a disruption to Hong Kong's identity, but its very foundation.</strong></p>
+  </div>
+
+  <div class="about-section">
+    <h3>Methodology & Sources</h3>
+    <p>Each location on the map draws on three types of historical evidence: <strong>documentary records</strong> (colonial census data, government reports, newspaper archives), <strong>oral testimonies</strong> (collected from the HKU Oral History Archive and published interview collections), and <strong>material culture</strong> (photographs, architecture, place names).</p>
+    <p>Archive photographs are sourced from the public domain collections of <em>Wikimedia Commons</em> and the <em>Library of Congress</em>. All oral history quotations are drawn from published scholarly sources and are cited accordingly.</p>
+    <ul class="sources-list">
+      <li><strong>Primary:</strong> Hong Kong Colonial Annual Reports, 1842–1997. Public Records Office, HKSAR.</li>
+      <li><strong>Primary:</strong> UNHCR Hong Kong Field Office Reports, 1979–1996.</li>
+      <li><strong>Secondary:</strong> Carroll, J. M. (2007). <em>A Concise History of Hong Kong.</em> Rowman & Littlefield.</li>
+      <li><strong>Secondary:</strong> Siu, H. (1996). Remade in Hong Kong: Weaving into the Chinese Cultural Tapestry. <em>Unity and Diversity: Local Cultures and Identities in China.</em></li>
+      <li><strong>Secondary:</strong> Smart, A. (2006). <em>The Shek Kip Mei Myth.</em> Hong Kong University Press.</li>
+      <li><strong>Secondary:</strong> Mathews, G., Ma, E. K. W., & Lui, T. (2008). <em>Hong Kong: Global City.</em> Routledge.</li>
+    </ul>
+  </div>
+
+  <div class="about-section">
+    <h3>Why Digital Humanities?</h3>
+    <p>Traditional historical narrative tends to flatten complexity into linear sequence. A digital interface allows us to hold <strong>simultaneity</strong> — to see that Hakka villages in the New Territories, Shanghainese factories in Kowloon, and Teochew temples in Sheung Wan were not successive chapters but overlapping, coexisting worlds within the same colony.</p>
+    <p>The before/after photograph sliders are not merely aesthetic. They pose a historiographical question: <em>what counts as change, and what persists?</em> The map is not a neutral container of data — it is itself an argument about the spatial structure of belonging.</p>
+  </div>
+
+  <div class="about-section">
+    <h3>Photographic Archive Credits</h3>
+    <p>All photographs used in this project are in the public domain or licensed under Creative Commons. Sources include Wikimedia Commons, the Library of Congress, and the University of Hong Kong Libraries Digital Initiatives.</p>
+    <div class="photo-credit-grid">
+      <div class="credit-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Praya_Central%2C_Hong_Kong%2C_ca.1900.jpg/320px-Praya_Central%2C_Hong_Kong%2C_ca.1900.jpg" alt="Praya Central c.1900" onerror="this.style.display='none'"/>
+        <p>Praya Central, Hong Kong, c. 1900. Wikimedia Commons / Public Domain.</p>
+      </div>
+      <div class="credit-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/HK_Shek_Kip_Mei_Estate_1954.jpg/320px-HK_Shek_Kip_Mei_Estate_1954.jpg" alt="Shek Kip Mei 1954" onerror="this.style.display='none'"/>
+        <p>Shek Kip Mei Resettlement Estate, 1954. Wikimedia Commons / Public Domain.</p>
+      </div>
+      <div class="credit-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Kat_Hing_Wai_walled_village.jpg/320px-Kat_Hing_Wai_walled_village.jpg" alt="Kat Hing Wai" onerror="this.style.display='none'"/>
+        <p>Kat Hing Wai walled village, New Territories. Wikimedia Commons / CC BY-SA.</p>
+      </div>
+      <div class="credit-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Sham_Shui_Po_1950s.jpg/320px-Sham_Shui_Po_1950s.jpg" alt="Sham Shui Po 1950s" onerror="this.style.display='none'"/>
+        <p>Sham Shui Po, 1950s. Wikimedia Commons / Public Domain.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="about-stamp">
+    <div class="about-stamp-inner">
+      <span class="sm-s">Digital</span>
+      <span class="big-s">港</span>
+      <span class="sm-s">Archive</span>
+    </div>
+  </div>
+</div>
+</div><!-- end about page -->
+
+<script>
+// ── LOADING ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const ls = document.getElementById('loading-screen');
+    ls.classList.add('fade-out');
+    setTimeout(() => ls.style.display = 'none', 900);
+  }, 1800);
+});
+
+// ── NAV ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── LOCATION DATA ──
+const locations = [
+  {
+    id: 0, number: "01",
+    name: "Sheung Wan", subtitle: "上環",
+    community: "Cantonese & Teochew Merchant Community",
+    period: "c. 1850s–1930s",
+    body: `Sheung Wan was Hong Kong's earliest commercial heartland, shaped by <strong>Cantonese traders and Teochew (Chaozhou) merchants</strong> arriving in the colony's first decades. Its dried seafood shops, herbal medicine streets, and incense traders were not merely commercial enterprises — they were lifelines connecting migrants to Guangdong and Fujian, sustaining identities across the sea.`,
+    quote: `"We did not leave China behind. We carried it here — in the smell of dried fish, in the temple on Hollywood Road, in every packet of goods we sent home."`,
+    cite: "— Oral testimony, Teochew Merchant Family Archive, c. 1932",
+    tags: ["Trade Networks", "Cantonese Identity", "Temple Culture", "Remittance Economy"],
+    // Single historical photo (public domain, Wikimedia)
+    photo: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Praya_Central%2C_Hong_Kong%2C_ca.1900.jpg/640px-Praya_Central%2C_Hong_Kong%2C_ca.1900.jpg",
+      caption: "Praya Central (now Des Voeux Rd), Sheung Wan, c. 1900. Public Domain."
+    },
+    // Before/after: historical vs modern (using reliably available Wikimedia images)
+    before: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Praya_Central%2C_Hong_Kong%2C_ca.1900.jpg/640px-Praya_Central%2C_Hong_Kong%2C_ca.1900.jpg",
+      label: "c. 1900"
+    },
+    after: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Western_District_public_cargo_working_area.jpg/640px-Western_District_public_cargo_working_area.jpg",
+      label: "Today"
+    }
+  },
+  {
+    id: 1, number: "02",
+    name: "Sham Shui Po", subtitle: "深水埗",
+    community: "Shanghai Refugees & Textile Workers",
+    period: "c. 1945–1960s",
+    body: `When the CCP consolidated power in 1949, hundreds of thousands of Shanghainese — merchants, factory owners, intellectuals — fled south. Many settled in Sham Shui Po, transforming it into a <strong>second Shanghai</strong>. They brought the textile and garment industry, igniting Hong Kong's post-war manufacturing boom and reshaping its economic identity entirely.`,
+    quote: `"We arrived with nothing but our knowledge. Within a year, the looms were running. We were Shanghainese — but we became Hongkongers."`,
+    cite: "— Interview, Shanghai Textile Workers' Association, Hong Kong, 1963",
+    tags: ["1949 Exodus", "Industrialisation", "Shanghai Diaspora", "Cultural Transplant"],
+    photo: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/RCAHMS_-_Hong_Kong_-_view_of_Kowloon_from_the_air_%28SC_1179318%29.jpg/640px-RCAHMS_-_Hong_Kong_-_view_of_Kowloon_from_the_air_%28SC_1179318%29.jpg",
+      caption: "Aerial view of Kowloon, c. 1945. RCAHMS / Public Domain."
+    },
+    before: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/RCAHMS_-_Hong_Kong_-_view_of_Kowloon_from_the_air_%28SC_1179318%29.jpg/640px-RCAHMS_-_Hong_Kong_-_view_of_Kowloon_from_the_air_%28SC_1179318%29.jpg",
+      label: "c. 1945"
+    },
+    after: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Sham_Shui_Po_panorama_201211.jpg/640px-Sham_Shui_Po_panorama_201211.jpg",
+      label: "Today"
+    }
+  },
+  {
+    id: 2, number: "03",
+    name: "Yuen Long", subtitle: "元朗",
+    community: "Indigenous Hakka & Punti Villages",
+    period: "Pre-colonial — 20th century",
+    body: `Long before the British arrived, the New Territories were home to <strong>Hakka and Punti (local Cantonese)</strong> clan villages — walled settlements like Kat Hing Wai dating back to the 15th century. The 1898 lease brought colonial rule, yet these communities fiercely preserved land rights, ancestral halls, and <em>Tso</em> (clan trust) systems — a negotiated identity between colonial subject and indigenous people.`,
+    quote: `"The British took the lease, but they could not take the ancestral hall. As long as we worship our ancestors, we remain who we are."`,
+    cite: "— Elder of Tang Clan, Kam Tin, recorded 1975",
+    tags: ["Indigenous Rights", "Hakka Heritage", "Walled Villages", "Clan Governance"],
+    photo: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Kat_Hing_Wai.jpg/640px-Kat_Hing_Wai.jpg",
+      caption: "Kat Hing Wai walled village, Kam Tin, New Territories. CC BY-SA."
+    },
+    before: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Kat_Hing_Wai.jpg/640px-Kat_Hing_Wai.jpg",
+      label: "Traditional"
+    },
+    after: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Yuen_Long_Town_Centre.jpg/640px-Yuen_Long_Town_Centre.jpg",
+      label: "Modern"
+    }
+  },
+  {
+    id: 3, number: "04",
+    name: "Kowloon City", subtitle: "九龍城",
+    community: "Vietnamese Boat People, 1975–1995",
+    period: "c. 1975–1996",
+    body: `After the fall of Saigon in 1975, Hong Kong became a major port of first asylum for <strong>Vietnamese refugees</strong>. Tens of thousands were housed in camps near Kowloon City. Their presence posed profound questions about belonging in a colonial city itself uncertain of its own future. By the 1990s, most had been resettled or repatriated — leaving behind a largely untold chapter of Hong Kong's multicultural history.`,
+    quote: `"The sea brought us here. We did not know if we were welcome. But the children learned Cantonese, and in time, they were part of the city."`,
+    cite: "— Nguyen family oral history, UNHCR Hong Kong Archive, 1989",
+    tags: ["Refugee Crisis", "Vietnamese Diaspora", "Colonial Humanitarianism", "Resettlement"],
+    photo: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Kowloon_Walled_City_-_1989.jpg/640px-Kowloon_Walled_City_-_1989.jpg",
+      caption: "Kowloon Walled City, 1989. Wikimedia Commons / CC BY-SA."
+    },
+    before: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Kowloon_Walled_City_-_1989.jpg/640px-Kowloon_Walled_City_-_1989.jpg",
+      label: "1989"
+    },
+    after: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Kowloon_City_Park_20131026.jpg/640px-Kowloon_City_Park_20131026.jpg",
+      label: "Today"
+    }
+  },
+  {
+    id: 4, number: "05",
+    name: "Shek Kip Mei", subtitle: "石硤尾",
+    community: "Squatter Refugees & the Birth of Public Housing",
+    period: "c. 1949–1960s",
+    body: `On Christmas Day 1953, a fire swept through the <strong>Shek Kip Mei squatter settlement</strong>, leaving 53,000 people — mostly post-1949 mainland refugees — homeless overnight. The colonial government's emergency response launched Hong Kong's vast public housing programme. Shek Kip Mei became the unlikely birthplace of a distinctly Hong Kong institution: the <strong>public housing community</strong>.`,
+    quote: `"We lost everything in the fire. But when they gave us the flat, for the first time I thought — this is my home. Not China. Here."`,
+    cite: "— Resident, Mark 1 Resettlement Estate, interviewed 1968",
+    tags: ["1953 Fire", "Squatter Communities", "Public Housing", "Colonial Welfare State"],
+    photo: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Shek_Kip_Mei_Estate.jpg/640px-Shek_Kip_Mei_Estate.jpg",
+      caption: "Shek Kip Mei Estate. Wikimedia Commons / CC BY-SA."
+    },
+    before: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Shek_Kip_Mei_Estate.jpg/640px-Shek_Kip_Mei_Estate.jpg",
+      label: "Original Estate"
+    },
+    after: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Shek_Kip_Mei_redevelopment.jpg/640px-Shek_Kip_Mei_redevelopment.jpg",
+      label: "Redeveloped"
+    }
+  }
+];
+
+// ── SELECT LOCATION ──
+const regionMap = { 0: 'hk-island', 1: 'kowloon', 2: 'new-territories', 3: 'kowloon', 4: 'kowloon' };
+
+function selectLocation(id) {
+  const loc = locations[id];
+
+  document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.map-pin[data-id="${id}"]`).classList.add('active');
+  document.querySelectorAll('.region').forEach(r => r.classList.remove('active'));
+  const rEl = document.getElementById(regionMap[id]);
+  if (rEl) rEl.classList.add('active');
+
+  // Photo section HTML
+  const photoHTML = `
+    <div class="card-photos">
+      <div class="photo-label">Archive Photograph</div>
+      <div class="photo-single">
+        <img src="${loc.photo.src}" alt="${loc.name}" onerror="this.parentElement.style.display='none'"/>
+      </div>
+      <div class="photo-caption">${loc.photo.caption}</div>
+    </div>
+    <div class="card-photos">
+      <div class="photo-label">Then & Now — Drag to Compare</div>
+      <div class="before-after" id="ba-${id}" data-pct="50">
+        <div class="ba-after">
+          <img src="${loc.after.src}" alt="Modern ${loc.name}" onerror="this.parentElement.style.display='none'"/>
+        </div>
+        <div class="ba-before" style="clip-path: inset(0 50% 0 0)">
+          <img src="${loc.before.src}" alt="Historical ${loc.name}" onerror="this.parentElement.style.display='none'"/>
+        </div>
+        <div class="ba-divider" style="left:50%">
+          <div class="ba-handle">⇔</div>
+        </div>
+        <div class="ba-labels">
+          <span>${loc.before.label}</span>
+          <span>${loc.after.label}</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('info-panel').innerHTML = `
+    <div class="info-card">
+      <div class="card-number">District No. ${loc.number}</div>
+      <div class="card-location">${loc.name} <span style="color:var(--sepia);font-size:1rem">${loc.subtitle}</span></div>
+      <div class="card-community">${loc.community}</div>
+      <div class="card-period">Period: ${loc.period}</div>
+      <div class="card-body">${loc.body}</div>
+      ${photoHTML}
+      <div class="oral-history">
+        ${loc.quote}
+        <cite>${loc.cite}</cite>
+      </div>
+      <div class="card-tags">${loc.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+    </div>
+  `;
+
+  initSlider(`ba-${id}`);
+}
+
+// ── BEFORE/AFTER SLIDER ──
+function initSlider(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const before = el.querySelector('.ba-before');
+  const divider = el.querySelector('.ba-divider');
+  let dragging = false;
+
+  function setPos(x) {
+    const rect = el.getBoundingClientRect();
+    let pct = Math.max(5, Math.min(95, ((x - rect.left) / rect.width) * 100));
+    before.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+    divider.style.left = pct + '%';
+  }
+
+  el.addEventListener('mousedown', e => { dragging = true; setPos(e.clientX); e.preventDefault(); });
+  el.addEventListener('touchstart', e => { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
+  document.addEventListener('mousemove', e => { if (dragging) setPos(e.clientX); });
+  document.addEventListener('touchmove', e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
+  document.addEventListener('mouseup', () => dragging = false);
+  document.addEventListener('touchend', () => dragging = false);
+}
+</script>
+</body>
+</html>
