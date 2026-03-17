@@ -209,8 +209,7 @@ svg#hk-map { width: 100%; height: auto; display: block; }
 .region { cursor: pointer; transition: fill 0.25s; }
 .region:hover { fill: var(--map-land-hover); }
 .region.active { fill: #b8956a; }
-.map-pin { cursor: pointer; transition: transform 0.2s; transform-origin: center bottom; }
-.map-pin:hover { transform: scale(1.3) translateY(-4px); }
+.map-pin { cursor: pointer; }
 .map-pin.active circle { fill: #c0392b; }
 .map-pin.active polygon { fill: #c0392b; }
 .pin-number {
@@ -282,77 +281,169 @@ svg#hk-map { width: 100%; height: auto; display: block; }
 .card-body { font-size: 0.95rem; line-height: 1.65; color: var(--ink-faded); margin-bottom: 14px; }
 .card-body strong { color: var(--ink); }
 
-/* ── PHOTO SECTION inside card ── */
-.card-photos { margin: 14px 0; }
-.photo-label {
+/* ── COMMUNITY NETWORK GRAPH ── */
+.network-section { margin: 14px 0; }
+.network-label {
   font-family: 'Special Elite', cursive; font-size: 0.62rem;
   letter-spacing: 2px; text-transform: uppercase; color: var(--sepia);
   margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
 }
-.photo-label::after { content: ''; flex: 1; border-top: 1px dashed var(--paper-dark); }
-
-.photo-single img {
-  width: 100%; height: 160px; object-fit: cover;
-  border: 1px solid var(--sepia); filter: sepia(30%) contrast(1.05);
-  display: block;
-}
-.photo-caption {
-  font-family: 'Special Elite', cursive; font-size: 0.6rem;
-  color: var(--sepia); letter-spacing: 0.5px; margin-top: 4px;
-  font-style: italic; text-align: center;
-}
-
-/* ── BEFORE/AFTER SLIDER ── */
-.before-after {
+.network-label::after { content: ''; flex: 1; border-top: 1px dashed var(--paper-dark); }
+.network-wrap {
+  border: 1px solid var(--sepia);
+  background: var(--paper-dark);
   position: relative; overflow: hidden;
-  border: 1px solid var(--sepia); cursor: ew-resize;
-  height: 160px; user-select: none;
 }
-.ba-after {
-  position: absolute; inset: 0;
-  overflow: hidden;
+.network-wrap svg { display: block; width: 100%; height: auto; }
+/* node hover */
+.net-node { cursor: pointer; }
+.net-node circle { transition: r 0.2s, filter 0.2s; }
+.net-node:hover circle { filter: brightness(1.2); }
+.net-node text { pointer-events: none; }
+/* edge tooltip */
+.edge-tip {
+  position: absolute; background: var(--ink); color: var(--paper);
+  font-family: 'Crimson Text', serif; font-size: 11px; font-style: italic;
+  padding: 5px 9px; pointer-events: none; opacity: 0;
+  transition: opacity 0.2s; white-space: nowrap; z-index: 20;
+  border-left: 2px solid var(--red-stamp);
 }
-.ba-after img {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%; object-fit: cover;
-  filter: none;
+/* legend strip */
+.net-legend {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 8px 10px; border-top: 1px dashed var(--paper-dark);
 }
-.ba-before {
-  position: absolute; inset: 0;
-  overflow: hidden;
+.net-legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'Special Elite', cursive; font-size: 0.58rem;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--ink-faded);
 }
-.ba-before img {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%; object-fit: cover;
-  filter: sepia(60%) contrast(1.05);
+.net-legend-line {
+  width: 22px; height: 2px; flex-shrink: 0;
 }
-.ba-divider {
-  position: absolute; top: 0; bottom: 0;
-  width: 2px; background: white;
-  box-shadow: 0 0 6px rgba(0,0,0,0.5);
-  z-index: 10; pointer-events: none;
+
+
+/* ── ARCHIVE DRAWER ── */
+.archive-drawer {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 340px;
+  z-index: 500;
+  transform: translateX(100%);
+  transition: transform 0.38s cubic-bezier(0.22,0.61,0.36,1);
+  display: flex; flex-direction: column;
+  pointer-events: none;
 }
-.ba-handle {
-  position: absolute; top: 50%; left: -14px;
-  width: 28px; height: 28px;
-  background: white; border-radius: 50%;
-  border: 2px solid var(--sepia);
-  display: flex; align-items: center; justify-content: center;
-  transform: translateY(-50%);
-  font-size: 11px; color: var(--ink); pointer-events: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+.archive-drawer.open {
+  transform: translateX(0);
+  pointer-events: all;
 }
-.ba-labels {
-  position: absolute; bottom: 6px; left: 0; right: 0;
-  display: flex; justify-content: space-between;
-  padding: 0 8px; pointer-events: none; z-index: 11;
+.drawer-paper {
+  flex: 1;
+  background-color: #f0e4cc;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 27px,
+      rgba(100,70,30,0.05) 27px, rgba(100,70,30,0.05) 28px);
+  border-left: 3px solid var(--sepia);
+  box-shadow: -6px 0 24px rgba(44,26,14,0.25);
+  overflow-y: auto;
+  position: relative;
 }
-.ba-labels span {
-  font-family: 'Special Elite', cursive; font-size: 8px;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  background: rgba(0,0,0,0.55); color: var(--paper-dark);
-  padding: 2px 6px;
+/* aged paper torn edge */
+.drawer-paper::before {
+  content: '';
+  position: absolute; top: 0; left: -8px; bottom: 0; width: 8px;
+  background: repeating-linear-gradient(
+    180deg,
+    #f0e4cc 0px, #e8d8ba 4px, #f0e4cc 8px
+  );
+  opacity: 0.7;
 }
+.drawer-inner { padding: 28px 24px 32px; }
+.drawer-close {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: 1px solid var(--sepia);
+  color: var(--sepia); font-family: 'Special Elite', cursive;
+  font-size: 0.65rem; letter-spacing: 2px; padding: 3px 9px;
+  cursor: pointer; text-transform: uppercase;
+  transition: background 0.2s, color 0.2s;
+}
+.drawer-close:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.drawer-file-tag {
+  font-family: 'Special Elite', cursive; font-size: 0.6rem;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--red-stamp); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.drawer-file-tag::before {
+  content: '';
+  display: inline-block; width: 20px; height: 2px;
+  background: var(--red-stamp);
+}
+.drawer-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.7rem; color: var(--ink);
+  line-height: 1.1; margin-bottom: 4px;
+}
+.drawer-subtitle {
+  font-family: 'Special Elite', cursive; font-size: 0.68rem;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--sepia); margin-bottom: 16px;
+}
+.drawer-divider {
+  border: none; border-top: 1px solid var(--sepia-light);
+  margin: 14px 0; opacity: 0.6;
+}
+.drawer-section-title {
+  font-family: 'Special Elite', cursive; font-size: 0.62rem;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--red-stamp); margin-bottom: 8px;
+}
+.drawer-body {
+  font-size: 0.95rem; line-height: 1.7;
+  color: var(--ink-faded); margin-bottom: 16px;
+}
+.drawer-body strong { color: var(--ink); }
+/* stats row */
+.drawer-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 16px;
+}
+.stat-box {
+  border: 1px solid var(--sepia-light);
+  padding: 10px 12px; background: rgba(240,220,180,0.4);
+}
+.stat-num {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.4rem; color: var(--ink); line-height: 1;
+  margin-bottom: 3px;
+}
+.stat-label {
+  font-family: 'Special Elite', cursive; font-size: 0.58rem;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--sepia);
+}
+/* timeline mini */
+.drawer-timeline { margin-bottom: 16px; }
+.dtl-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-bottom: 9px;
+}
+.dtl-year {
+  font-family: 'Special Elite', cursive; font-size: 0.72rem;
+  color: var(--red-stamp); min-width: 38px; padding-top: 1px;
+}
+.dtl-event {
+  font-size: 0.88rem; color: var(--ink-faded); line-height: 1.45;
+  border-left: 2px solid var(--paper-dark); padding-left: 10px;
+  flex: 1;
+}
+/* overlay dim */
+.drawer-overlay {
+  position: fixed; inset: 0; background: rgba(26,15,5,0.35);
+  z-index: 499; opacity: 0; pointer-events: none;
+  transition: opacity 0.38s ease;
+}
+.drawer-overlay.open { opacity: 1; pointer-events: all; }
 
 /* ── ORAL HISTORY ── */
 .oral-history {
@@ -487,6 +578,8 @@ svg#hk-map { width: 100%; height: auto; display: block; }
 .about-stamp-inner .big-s { font-size: 1.5rem; }
 .about-stamp-inner .sm-s { font-size: 6.5px; letter-spacing: 1px; text-transform: uppercase; }
 
+
+
 /* ── FOOTER ── */
 footer {
   text-align: center; padding: 20px; border-top: 1px solid var(--sepia); margin-top: 8px;
@@ -592,31 +685,41 @@ footer {
         <line x1="140" y1="33" x2="470" y2="33" stroke="#8a7050" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.35"/>
         <text x="272" y="198" font-family="'IM Fell English',serif" font-size="10" fill="#4a7a9b" text-anchor="middle" opacity="0.55" font-style="italic">Victoria Harbour</text>
         <text x="510" y="305" font-family="'IM Fell English',serif" font-size="11" fill="#4a7a9b" text-anchor="middle" opacity="0.45" font-style="italic">South China Sea</text>
-        <!-- PINS -->
-        <g class="map-pin" data-id="0" onclick="selectLocation(0)" transform="translate(195,216)">
-          <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
-          <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
-          <text class="pin-number" x="0" y="-8">1</text>
+        <!-- PINS: outer g = position only, inner g.map-pin = hover target -->
+        <g transform="translate(195,208)">
+          <g class="map-pin" data-id="0" onclick="selectLocation(0)">
+            <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+            <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+            <text class="pin-number" x="0" y="-8">1</text>
+          </g>
         </g>
-        <g class="map-pin" data-id="1" onclick="selectLocation(1)" transform="translate(232,162)">
-          <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
-          <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
-          <text class="pin-number" x="0" y="-8">2</text>
+        <g transform="translate(232,154)">
+          <g class="map-pin" data-id="1" onclick="selectLocation(1)">
+            <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+            <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+            <text class="pin-number" x="0" y="-8">2</text>
+          </g>
         </g>
-        <g class="map-pin" data-id="2" onclick="selectLocation(2)" transform="translate(188,82)">
-          <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
-          <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
-          <text class="pin-number" x="0" y="-8">3</text>
+        <g transform="translate(188,74)">
+          <g class="map-pin" data-id="2" onclick="selectLocation(2)">
+            <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+            <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+            <text class="pin-number" x="0" y="-8">3</text>
+          </g>
         </g>
-        <g class="map-pin" data-id="3" onclick="selectLocation(3)" transform="translate(308,155)">
-          <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
-          <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
-          <text class="pin-number" x="0" y="-8">4</text>
+        <g transform="translate(308,147)">
+          <g class="map-pin" data-id="3" onclick="selectLocation(3)">
+            <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+            <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+            <text class="pin-number" x="0" y="-8">4</text>
+          </g>
         </g>
-        <g class="map-pin" data-id="4" onclick="selectLocation(4)" transform="translate(263,148)">
-          <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
-          <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
-          <text class="pin-number" x="0" y="-8">5</text>
+        <g transform="translate(263,140)">
+          <g class="map-pin" data-id="4" onclick="selectLocation(4)">
+            <polygon points="0,-20 8,-8 -8,-8" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+            <circle cx="0" cy="-8" r="9" fill="#8b1a1a" stroke="#5a0f0f" stroke-width="0.8"/>
+            <text class="pin-number" x="0" y="-8">5</text>
+          </g>
         </g>
         <!-- Scale -->
         <g transform="translate(30,392)">
@@ -688,6 +791,18 @@ footer {
     <footer><p class="footer-text">A Digital History Project · HKU MA Hong Kong Studies</p></footer>
   </div>
 </div>
+
+<!-- ARCHIVE DRAWER -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="archive-drawer" id="archive-drawer">
+  <div class="drawer-paper">
+    <div class="drawer-inner" id="drawer-inner">
+      <!-- content injected by JS -->
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">Close ✕</button>
+  </div>
+</div>
+
 </div><!-- end map page -->
 
 <!-- ══ ABOUT PAGE ══ -->
@@ -783,7 +898,7 @@ function showPage(name) {
 // ── LOCATION DATA ──
 const locations = [
   {
-    id: 0, number: "01",
+    id: 0, number: "01", imgSlug: "sheung-wan",
     name: "Sheung Wan", subtitle: "上環",
     community: "Cantonese & Teochew Merchant Community",
     period: "c. 1850s–1930s",
@@ -791,23 +906,12 @@ const locations = [
     quote: `"We did not leave China behind. We carried it here — in the smell of dried fish, in the temple on Hollywood Road, in every packet of goods we sent home."`,
     cite: "— Oral testimony, Teochew Merchant Family Archive, c. 1932",
     tags: ["Trade Networks", "Cantonese Identity", "Temple Culture", "Remittance Economy"],
-    // Single historical photo (public domain, Wikimedia)
-    photo: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Praya_Central%2C_Hong_Kong%2C_ca.1900.jpg/640px-Praya_Central%2C_Hong_Kong%2C_ca.1900.jpg",
-      caption: "Praya Central (now Des Voeux Rd), Sheung Wan, c. 1900. Public Domain."
-    },
-    // Before/after: historical vs modern (using reliably available Wikimedia images)
-    before: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Praya_Central%2C_Hong_Kong%2C_ca.1900.jpg/640px-Praya_Central%2C_Hong_Kong%2C_ca.1900.jpg",
-      label: "c. 1900"
-    },
-    after: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Western_District_public_cargo_working_area.jpg/640px-Western_District_public_cargo_working_area.jpg",
-      label: "Today"
-    }
+    photo: { caption: "Praya Central (now Des Voeux Rd), Sheung Wan, c. 1900. Public Domain." },
+    before: { label: "c. 1900" },
+    after:  { label: "Today" }
   },
   {
-    id: 1, number: "02",
+    id: 1, number: "02", imgSlug: "sham-shui-po",
     name: "Sham Shui Po", subtitle: "深水埗",
     community: "Shanghai Refugees & Textile Workers",
     period: "c. 1945–1960s",
@@ -815,21 +919,12 @@ const locations = [
     quote: `"We arrived with nothing but our knowledge. Within a year, the looms were running. We were Shanghainese — but we became Hongkongers."`,
     cite: "— Interview, Shanghai Textile Workers' Association, Hong Kong, 1963",
     tags: ["1949 Exodus", "Industrialisation", "Shanghai Diaspora", "Cultural Transplant"],
-    photo: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/RCAHMS_-_Hong_Kong_-_view_of_Kowloon_from_the_air_%28SC_1179318%29.jpg/640px-RCAHMS_-_Hong_Kong_-_view_of_Kowloon_from_the_air_%28SC_1179318%29.jpg",
-      caption: "Aerial view of Kowloon, c. 1945. RCAHMS / Public Domain."
-    },
-    before: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/RCAHMS_-_Hong_Kong_-_view_of_Kowloon_from_the_air_%28SC_1179318%29.jpg/640px-RCAHMS_-_Hong_Kong_-_view_of_Kowloon_from_the_air_%28SC_1179318%29.jpg",
-      label: "c. 1945"
-    },
-    after: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Sham_Shui_Po_panorama_201211.jpg/640px-Sham_Shui_Po_panorama_201211.jpg",
-      label: "Today"
-    }
+    photo: { caption: "Aerial view of Kowloon, c. 1945. RCAHMS / Public Domain." },
+    before: { label: "c. 1945" },
+    after:  { label: "Today" }
   },
   {
-    id: 2, number: "03",
+    id: 2, number: "03", imgSlug: "yuen-long",
     name: "Yuen Long", subtitle: "元朗",
     community: "Indigenous Hakka & Punti Villages",
     period: "Pre-colonial — 20th century",
@@ -837,21 +932,12 @@ const locations = [
     quote: `"The British took the lease, but they could not take the ancestral hall. As long as we worship our ancestors, we remain who we are."`,
     cite: "— Elder of Tang Clan, Kam Tin, recorded 1975",
     tags: ["Indigenous Rights", "Hakka Heritage", "Walled Villages", "Clan Governance"],
-    photo: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Kat_Hing_Wai.jpg/640px-Kat_Hing_Wai.jpg",
-      caption: "Kat Hing Wai walled village, Kam Tin, New Territories. CC BY-SA."
-    },
-    before: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Kat_Hing_Wai.jpg/640px-Kat_Hing_Wai.jpg",
-      label: "Traditional"
-    },
-    after: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Yuen_Long_Town_Centre.jpg/640px-Yuen_Long_Town_Centre.jpg",
-      label: "Modern"
-    }
+    photo: { caption: "Kat Hing Wai walled village, Kam Tin, New Territories. CC BY-SA." },
+    before: { label: "Traditional" },
+    after:  { label: "Modern" }
   },
   {
-    id: 3, number: "04",
+    id: 3, number: "04", imgSlug: "kowloon-city",
     name: "Kowloon City", subtitle: "九龍城",
     community: "Vietnamese Boat People, 1975–1995",
     period: "c. 1975–1996",
@@ -859,21 +945,12 @@ const locations = [
     quote: `"The sea brought us here. We did not know if we were welcome. But the children learned Cantonese, and in time, they were part of the city."`,
     cite: "— Nguyen family oral history, UNHCR Hong Kong Archive, 1989",
     tags: ["Refugee Crisis", "Vietnamese Diaspora", "Colonial Humanitarianism", "Resettlement"],
-    photo: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Kowloon_Walled_City_-_1989.jpg/640px-Kowloon_Walled_City_-_1989.jpg",
-      caption: "Kowloon Walled City, 1989. Wikimedia Commons / CC BY-SA."
-    },
-    before: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Kowloon_Walled_City_-_1989.jpg/640px-Kowloon_Walled_City_-_1989.jpg",
-      label: "1989"
-    },
-    after: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Kowloon_City_Park_20131026.jpg/640px-Kowloon_City_Park_20131026.jpg",
-      label: "Today"
-    }
+    photo: { caption: "Kowloon Walled City, 1989. CC BY-SA." },
+    before: { label: "1989" },
+    after:  { label: "Today" }
   },
   {
-    id: 4, number: "05",
+    id: 4, number: "05", imgSlug: "shek-kip-mei",
     name: "Shek Kip Mei", subtitle: "石硤尾",
     community: "Squatter Refugees & the Birth of Public Housing",
     period: "c. 1949–1960s",
@@ -881,20 +958,23 @@ const locations = [
     quote: `"We lost everything in the fire. But when they gave us the flat, for the first time I thought — this is my home. Not China. Here."`,
     cite: "— Resident, Mark 1 Resettlement Estate, interviewed 1968",
     tags: ["1953 Fire", "Squatter Communities", "Public Housing", "Colonial Welfare State"],
-    photo: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Shek_Kip_Mei_Estate.jpg/640px-Shek_Kip_Mei_Estate.jpg",
-      caption: "Shek Kip Mei Estate. Wikimedia Commons / CC BY-SA."
-    },
-    before: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Shek_Kip_Mei_Estate.jpg/640px-Shek_Kip_Mei_Estate.jpg",
-      label: "Original Estate"
-    },
-    after: {
-      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Shek_Kip_Mei_redevelopment.jpg/640px-Shek_Kip_Mei_redevelopment.jpg",
-      label: "Redeveloped"
-    }
+    photo: { caption: "Shek Kip Mei Estate. CC BY-SA." },
+    before: { label: "Original Estate" },
+    after:  { label: "Redeveloped" }
   }
 ];
+
+// ── PIN HOVER via JS (avoids CSS transform conflict with SVG translate) ──
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.map-pin').forEach(pin => {
+    pin.addEventListener('mouseenter', () => {
+      pin.setAttribute('transform', 'scale(1.2) translate(0, -2)');
+    });
+    pin.addEventListener('mouseleave', () => {
+      pin.removeAttribute('transform');
+    });
+  });
+});
 
 // ── SELECT LOCATION ──
 const regionMap = { 0: 'hk-island', 1: 'kowloon', 2: 'new-territories', 3: 'kowloon', 4: 'kowloon' };
@@ -908,35 +988,6 @@ function selectLocation(id) {
   const rEl = document.getElementById(regionMap[id]);
   if (rEl) rEl.classList.add('active');
 
-  // Photo section HTML
-  const photoHTML = `
-    <div class="card-photos">
-      <div class="photo-label">Archive Photograph</div>
-      <div class="photo-single">
-        <img src="${loc.photo.src}" alt="${loc.name}" onerror="this.parentElement.style.display='none'"/>
-      </div>
-      <div class="photo-caption">${loc.photo.caption}</div>
-    </div>
-    <div class="card-photos">
-      <div class="photo-label">Then & Now — Drag to Compare</div>
-      <div class="before-after" id="ba-${id}" data-pct="50">
-        <div class="ba-after">
-          <img src="${loc.after.src}" alt="Modern ${loc.name}" onerror="this.parentElement.style.display='none'"/>
-        </div>
-        <div class="ba-before" style="clip-path: inset(0 50% 0 0)">
-          <img src="${loc.before.src}" alt="Historical ${loc.name}" onerror="this.parentElement.style.display='none'"/>
-        </div>
-        <div class="ba-divider" style="left:50%">
-          <div class="ba-handle">⇔</div>
-        </div>
-        <div class="ba-labels">
-          <span>${loc.before.label}</span>
-          <span>${loc.after.label}</span>
-        </div>
-      </div>
-    </div>
-  `;
-
   document.getElementById('info-panel').innerHTML = `
     <div class="info-card">
       <div class="card-number">District No. ${loc.number}</div>
@@ -944,40 +995,555 @@ function selectLocation(id) {
       <div class="card-community">${loc.community}</div>
       <div class="card-period">Period: ${loc.period}</div>
       <div class="card-body">${loc.body}</div>
-      ${photoHTML}
+      <div class="network-section">
+        <div class="network-label">Community Relations Network</div>
+        <div class="network-wrap" id="net-wrap-${id}">
+          <div class="edge-tip" id="edge-tip-${id}"></div>
+        </div>
+        <div class="net-legend">
+          <div class="net-legend-item"><div class="net-legend-line" style="background:var(--red-stamp)"></div>Cultural Exchange</div>
+          <div class="net-legend-item"><div class="net-legend-line" style="background:var(--sepia);border-top:2px dashed var(--sepia);height:0"></div>Economic Ties</div>
+          <div class="net-legend-item"><div class="net-legend-line" style="background:var(--sepia-light);opacity:0.6"></div>Social Tension</div>
+        </div>
+      </div>
       <div class="oral-history">
         ${loc.quote}
         <cite>${loc.cite}</cite>
       </div>
-      <div class="card-tags">${loc.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <div class="card-tags">${loc.tags.map(function(t){return '<span class="tag">'+t+'</span>';}).join('')}</div>
     </div>
   `;
 
-  initSlider(`ba-${id}`);
+  drawNetwork(id);
 }
 
-// ── BEFORE/AFTER SLIDER ──
-function initSlider(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const before = el.querySelector('.ba-before');
-  const divider = el.querySelector('.ba-divider');
-  let dragging = false;
-
-  function setPos(x) {
-    const rect = el.getBoundingClientRect();
-    let pct = Math.max(5, Math.min(95, ((x - rect.left) / rect.width) * 100));
-    before.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
-    divider.style.left = pct + '%';
+// ── COMMUNITY NETWORK DATA ──
+var networks = {
+  0: {
+    nodes: [
+      { id: 'teochew', label: ['Teochew','Merchants'], r: 28, color: '#8b1a1a' },
+      { id: 'canton',  label: ['Cantonese','Locals'],  r: 24, color: '#7a5c2e' },
+      { id: 'hakka',   label: ['Hakka','Traders'],     r: 18, color: '#5c8a4a' },
+      { id: 'british', label: ['British','Admin'],     r: 20, color: '#4a6a8a' },
+      { id: 'indian',  label: ['South Asian','Traders'],r:15, color: '#8a6a2a' }
+    ],
+    edges: [
+      { a:'teochew', b:'canton',  type:'cultural', label:'Shared temple worship and clan networks' },
+      { a:'teochew', b:'hakka',   type:'economic', label:'Competing dried-goods trade routes' },
+      { a:'canton',  b:'british', type:'economic', label:'Compradors bridged colonial commerce' },
+      { a:'british', b:'indian',  type:'economic', label:'Imperial trade network via India' },
+      { a:'teochew', b:'british', type:'tension',  label:'Tax disputes over pier rights, 1880s' },
+      { a:'hakka',   b:'canton',  type:'tension',  label:'Punti-Hakka clan feuds, pre-colonial' }
+    ]
+  },
+  1: {
+    nodes: [
+      { id: 'shangh',  label: ['Shanghainese','Refugees'],  r: 30, color: '#8b1a1a' },
+      { id: 'canton',  label: ['Cantonese','Residents'],    r: 26, color: '#7a5c2e' },
+      { id: 'govt',    label: ['Colonial','Government'],    r: 20, color: '#4a6a8a' },
+      { id: 'workers', label: ['Factory','Workers'],        r: 22, color: '#5c8a4a' },
+      { id: 'manu',    label: ['Manufacturing','Industry'], r: 18, color: '#8a6a2a' }
+    ],
+    edges: [
+      { a:'shangh',  b:'manu',    type:'economic', label:'Shanghai capital funded HK factories' },
+      { a:'shangh',  b:'workers', type:'economic', label:'Employed displaced mainland migrants' },
+      { a:'canton',  b:'shangh',  type:'tension',  label:'Competition for housing and employment' },
+      { a:'shangh',  b:'govt',    type:'cultural', label:'Shared anti-Communist political stance' },
+      { a:'workers', b:'govt',    type:'tension',  label:'Labour strikes and 1967 leftist riots' },
+      { a:'manu',    b:'canton',  type:'economic', label:'Cantonese workers staffed the mills' }
+    ]
+  },
+  2: {
+    nodes: [
+      { id: 'tang',  label: ['Tang Clan','(Punti)'],  r: 30, color: '#8b1a1a' },
+      { id: 'hakka', label: ['Hakka','Villagers'],    r: 26, color: '#5c8a4a' },
+      { id: 'brit',  label: ['British','Admin'],      r: 20, color: '#4a6a8a' },
+      { id: 'malay', label: ['New','Migrants'],       r: 16, color: '#8a6a2a' },
+      { id: 'anc',   label: ['Ancestor','Cult'],      r: 18, color: '#7a5c2e' }
+    ],
+    edges: [
+      { a:'tang',  b:'anc',   type:'cultural', label:'Tso clan trust preserved land and ritual' },
+      { a:'tang',  b:'hakka', type:'tension',  label:'Punti-Hakka Wars, 1855-1867' },
+      { a:'brit',  b:'tang',  type:'tension',  label:'1899 resistance to New Territories lease' },
+      { a:'brit',  b:'hakka', type:'economic', label:'Hakka adopted wage labour under colony' },
+      { a:'tang',  b:'brit',  type:'economic', label:'Negotiated land rights, Block Crown Lease' },
+      { a:'malay', b:'tang',  type:'tension',  label:'Post-war in-migration disrupted clan order' }
+    ]
+  },
+  3: {
+    nodes: [
+      { id: 'viet',   label: ['Vietnamese','Refugees'], r: 30, color: '#8b1a1a' },
+      { id: 'canton', label: ['Cantonese','Community'], r: 26, color: '#7a5c2e' },
+      { id: 'unhcr',  label: ['UNHCR','& NGOs'],       r: 20, color: '#4a6a8a' },
+      { id: 'govt',   label: ['HK Colonial','Govt'],   r: 22, color: '#5c6a8a' },
+      { id: 'chin',   label: ['Mainland','Chinese'],   r: 16, color: '#8a5a2a' }
+    ],
+    edges: [
+      { a:'viet',   b:'unhcr',  type:'economic', label:'UNHCR managed resettlement processing' },
+      { a:'viet',   b:'canton', type:'cultural', label:'Children adopted Cantonese language and customs' },
+      { a:'viet',   b:'govt',   type:'tension',  label:'Detention policy and forced repatriation, 1989' },
+      { a:'canton', b:'govt',   type:'tension',  label:'Local resentment over camp resources' },
+      { a:'govt',   b:'unhcr',  type:'economic', label:'Cost-sharing of humanitarian burden' },
+      { a:'chin',   b:'viet',   type:'cultural', label:'Shared Sino-Vietnamese cultural heritage' }
+    ]
+  },
+  4: {
+    nodes: [
+      { id: 'squatter', label: ['Squatter','Refugees'],    r: 30, color: '#8b1a1a' },
+      { id: 'govt',     label: ['Colonial','Govt'],        r: 26, color: '#4a6a8a' },
+      { id: 'canton',   label: ['Cantonese','Neighbours'], r: 20, color: '#7a5c2e' },
+      { id: 'church',   label: ['Church','& NGOs'],        r: 18, color: '#5c8a4a' },
+      { id: 'factory',  label: ['Nearby','Factories'],     r: 16, color: '#8a6a2a' }
+    ],
+    edges: [
+      { a:'squatter', b:'govt',    type:'economic', label:'1953 fire triggered public housing policy' },
+      { a:'squatter', b:'church',  type:'cultural', label:'Missionaries provided schools and clinics' },
+      { a:'squatter', b:'factory', type:'economic', label:'Refugees became the industrial workforce' },
+      { a:'squatter', b:'canton',  type:'cultural', label:'Gradual assimilation into HK identity' },
+      { a:'govt',     b:'factory', type:'economic', label:'Resettlement served industrial labour needs' },
+      { a:'church',   b:'canton',  type:'cultural', label:'Shared welfare infrastructure built community' }
+    ]
   }
+};
 
-  el.addEventListener('mousedown', e => { dragging = true; setPos(e.clientX); e.preventDefault(); });
-  el.addEventListener('touchstart', e => { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
-  document.addEventListener('mousemove', e => { if (dragging) setPos(e.clientX); });
-  document.addEventListener('touchmove', e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
-  document.addEventListener('mouseup', () => dragging = false);
-  document.addEventListener('touchend', () => dragging = false);
+var edgeStyles = {
+  cultural: { stroke: '#8b1a1a', dash: 'none', width: 2,   opacity: 0.75 },
+  economic: { stroke: '#7a5c2e', dash: '6,3',  width: 1.5, opacity: 0.70 },
+  tension:  { stroke: '#a07840', dash: '2,4',  width: 1.5, opacity: 0.55 }
+};
+
+function drawNetwork(locId) {
+  var wrap = document.getElementById('net-wrap-' + locId);
+  if (!wrap) return;
+
+  var W = 320, H = 210;
+  var data = networks[locId];
+  var cx = W/2, cy = H/2, R = 78;
+
+  // Position nodes
+  data.nodes.forEach(function(n, i) {
+    if (i === 0) { n.x = cx; n.y = cy; }
+    else {
+      var angle = ((i-1) / (data.nodes.length-1)) * Math.PI * 2 - Math.PI/2;
+      n.x = cx + R * Math.cos(angle);
+      n.y = cy + R * Math.sin(angle);
+    }
+  });
+
+  var byId = {};
+  data.nodes.forEach(function(n) { byId[n.id] = n; });
+
+  var edgeSVG = '';
+  var nodeSVG = '';
+
+  data.edges.forEach(function(e) {
+    var a = byId[e.a], b = byId[e.b];
+    if (!a || !b) return;
+    var s = edgeStyles[e.type];
+    var mx = (a.x+b.x)/2, my = (a.y+b.y)/2;
+    var safeLabel = e.label.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    edgeSVG += '<line class="net-edge" data-tip="' + safeLabel + '"'
+      + ' x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '"'
+      + ' stroke="' + s.stroke + '" stroke-width="' + s.width + '"'
+      + ' stroke-dasharray="' + s.dash + '" opacity="' + s.opacity + '"'
+      + ' style="cursor:pointer"/>';
+    edgeSVG += '<circle class="net-edge-hit" data-tip="' + safeLabel + '"'
+      + ' cx="' + mx + '" cy="' + my + '" r="10"'
+      + ' fill="transparent" style="cursor:pointer"/>';
+  });
+
+  data.nodes.forEach(function(n) {
+    var textY1 = n.y + n.r + 11;
+    var hasProfile = communityProfiles[n.id] ? 'onclick="openDrawer(\'' + n.id + '\')" style="cursor:pointer"' : '';
+    var hasHint = communityProfiles[n.id]
+      ? '<circle cx="' + (n.x + n.r - 3) + '" cy="' + (n.y - n.r + 3) + '" r="5"'
+        + ' fill="#8b1a1a" opacity="0.8"/>'
+        + '<text x="' + (n.x + n.r - 3) + '" y="' + (n.y - n.r + 7) + '"'
+        + ' font-size="7" fill="white" text-anchor="middle" pointer-events="none">i</text>'
+      : '';
+    nodeSVG += '<g class="net-node" ' + hasProfile + '>';
+    nodeSVG += '<circle cx="' + n.x + '" cy="' + n.y + '" r="' + n.r + '"'
+      + ' fill="' + n.color + '" fill-opacity="0.18"'
+      + ' stroke="' + n.color + '" stroke-width="1.5"/>';
+    nodeSVG += '<circle cx="' + n.x + '" cy="' + n.y + '" r="' + (n.r*0.42) + '"'
+      + ' fill="' + n.color + '" opacity="0.55"/>';
+    n.label.forEach(function(ln, li) {
+      nodeSVG += '<text x="' + n.x + '" y="' + (textY1 + li*11) + '"'
+        + ' font-family="Special Elite,cursive" font-size="7.5"'
+        + ' fill="#5c3d20" text-anchor="middle" opacity="0.85">' + ln + '</text>';
+    });
+    nodeSVG += hasHint;
+    nodeSVG += '</g>';
+  });
+
+  wrap.innerHTML = '<div class="edge-tip" id="etip-' + locId + '"></div>'
+    + '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">'
+    + '<rect width="' + W + '" height="' + H + '" fill="#ede0c4" opacity="0.4"/>'
+    + '<g>' + edgeSVG + '</g>'
+    + '<g>' + nodeSVG + '</g>'
+    + '</svg>'
+    + '<div class="net-legend">'
+    + '<div class="net-legend-item"><div class="net-legend-line" style="background:#8b1a1a;height:2px"></div>Cultural Exchange</div>'
+    + '<div class="net-legend-item"><div class="net-legend-line" style="border-top:2px dashed #7a5c2e;height:0;background:none"></div>Economic Ties</div>'
+    + '<div class="net-legend-item"><div class="net-legend-line" style="border-top:2px dotted #a07840;height:0;background:none"></div>Social Tension</div>'
+    + '</div>';
+
+  var tip = document.getElementById('etip-' + locId);
+  var allEdges = wrap.querySelectorAll('.net-edge, .net-edge-hit');
+  for (var i = 0; i < allEdges.length; i++) {
+    (function(el) {
+      el.addEventListener('mouseenter', function(ev) {
+        tip.textContent = el.getAttribute('data-tip');
+        tip.style.opacity = '1';
+        tip.style.left = (ev.offsetX + 10) + 'px';
+        tip.style.top  = (ev.offsetY - 32) + 'px';
+      });
+      el.addEventListener('mousemove', function(ev) {
+        tip.style.left = (ev.offsetX + 10) + 'px';
+        tip.style.top  = (ev.offsetY - 32) + 'px';
+      });
+      el.addEventListener('mouseleave', function() {
+        tip.style.opacity = '0';
+      });
+    })(allEdges[i]);
+  }
 }
+
+// ── COMMUNITY PROFILES (for archive drawer) ──
+var communityProfiles = {
+  teochew: {
+    title: 'Teochew Merchants',
+    chinese: '潮州商人',
+    category: 'Merchant Diaspora',
+    body: "The Teochew (Chaozhou) people originate from eastern Guangdong province. Renowned as long-distance traders, they established tightly-knit clan networks across Southeast Asia and Hong Kong. In Sheung Wan, they dominated the dried seafood, herbal medicine, and incense trades, using clan associations (<em>huiguan</em>) to enforce contracts and support new arrivals.",
+    stats: [
+      { num: '~80,000', label: 'Peak HK population, 1930s' },
+      { num: '1840s', label: 'First arrival in colony' }
+    ],
+    timeline: [
+      { year: '1842', event: 'First Teochew traders settle around Sheung Wan following British occupation.' },
+      { year: '1870s', event: 'Chaozhou Merchants Association founded — regulates trade and mediates disputes.' },
+      { year: '1920s', event: 'Teochew networks extend into banking, insurance, and rice wholesale.' }
+    ]
+  },
+  canton: {
+    title: 'Cantonese Community',
+    chinese: '廣府人',
+    category: 'Indigenous Population',
+    body: "Cantonese speakers from the Pearl River Delta formed the largest ethnic group in colonial Hong Kong. As the native population, they occupied a unique position — simultaneously subjects of the British Crown and cultural custodians of the region. They staffed the colonial bureaucracy, ran small businesses, and shaped the Cantonese-speaking identity that became synonymous with \"Hong Kong culture.\"",
+    stats: [
+      { num: '~60%', label: 'Share of HK population, 1900' },
+      { num: '5,000+', label: 'Years of regional habitation' }
+    ],
+    timeline: [
+      { year: 'Pre-1842', event: 'Cantonese fishing villages and market towns pre-date British arrival.' },
+      { year: '1860s', event: 'Cantonese compradors become key intermediaries between British firms and Chinese markets.' },
+      { year: '1950s', event: 'Cantonese culture absorbs Shanghai and mainland influences to form modern HK identity.' }
+    ]
+  },
+  hakka: {
+    title: 'Hakka People',
+    chinese: '客家人',
+    category: 'Migrant Indigenous Group',
+    body: "The Hakka — literally \"guest people\" — migrated south from central China over centuries, settling in the hills of Guangdong and the New Territories. Traditionally farmers and quarry workers, they maintained a distinct dialect and culture. In Hong Kong, Hakka women were conspicuous for their distinctive wide-brimmed bamboo hats and refusal to bind their feet, marking them as culturally separate from Cantonese neighbours.",
+    stats: [
+      { num: '~100,000', label: 'NT Hakka population, early 1900s' },
+      { num: '700+', label: 'Years in New Territories' }
+    ],
+    timeline: [
+      { year: '1300s', event: 'Hakka clans establish farming villages across the New Territories.' },
+      { year: '1855', event: 'Punti-Hakka Wars erupt — decades of violent ethnic conflict over land.' },
+      { year: '1898', event: 'British lease of NT places Hakka villages under colonial jurisdiction.' }
+    ]
+  },
+  british: {
+    title: 'British Administration',
+    chinese: '英國殖民政府',
+    category: 'Colonial Authority',
+    body: "The British East India Company and later the Crown administered Hong Kong as a free port and strategic naval base. Colonial governance shaped everything from land tenure to education policy, yet remained deliberately minimal in social intervention — a \"positive non-interventionism\" that allowed migrant communities to self-organise. The administration's relationship with Chinese communities was mediated through compradors, clan elders, and appointed Chinese representatives.",
+    stats: [
+      { num: '155', label: 'Years of colonial rule' },
+      { num: '1997', label: 'Year of handover' }
+    ],
+    timeline: [
+      { year: '1842', event: 'Treaty of Nanking: Hong Kong Island ceded to Britain in perpetuity.' },
+      { year: '1898', event: 'Convention of Peking: New Territories leased for 99 years.' },
+      { year: '1984', event: 'Sino-British Joint Declaration announces 1997 handover.' }
+    ]
+  },
+  indian: {
+    title: 'South Asian Traders',
+    chinese: '南亞商人',
+    category: 'Imperial Trade Network',
+    body: "Sindhi, Gujarati, and Parsi merchants arrived in Hong Kong as part of the broader British imperial trading network connecting India, Southeast Asia, and China. They established textile firms, money-changing houses, and import-export businesses, often residing in the Mid-Levels. Sikh soldiers and policemen were also recruited by the colonial administration, becoming a visible presence in colonial Hong Kong.",
+    stats: [
+      { num: '~5,000', label: 'South Asian residents, 1920s' },
+      { num: '1840s', label: 'First traders arrive with British forces' }
+    ],
+    timeline: [
+      { year: '1840s', event: 'Parsi and Sindhi merchants establish trading houses in Central.' },
+      { year: '1860s', event: 'Sikh police and military units recruited for colonial service.' },
+      { year: '1920s', event: 'Indian textile merchants dominate cloth wholesale in Sheung Wan.' }
+    ]
+  },
+  shangh: {
+    title: 'Shanghainese Refugees',
+    chinese: '上海移民',
+    category: 'Post-War Refugee Wave',
+    body: "When the People's Liberation Army swept through China in 1948–49, Shanghai's industrial and commercial elite fled south. Many arrived in Hong Kong with capital, machinery, and expertise. They transplanted entire industries — especially textiles and plastics — transforming Hong Kong from a trading post into a manufacturing powerhouse. Their cosmopolitan outlook and Mandarin-language culture created a distinct enclave within Cantonese-dominated Hong Kong.",
+    stats: [
+      { num: '~300,000', label: 'Shanghai migrants, 1945–55' },
+      { num: '1950s', label: 'Peak of industrial migration' }
+    ],
+    timeline: [
+      { year: '1948', event: 'Civil War intensifies; Shanghai industrialists begin relocating to HK.' },
+      { year: '1949', event: 'PRC founded — mass exodus triggers Hong Kong population surge.' },
+      { year: "1960s", event: "HK becomes world's largest exporter of textiles, led by Shanghai capital." }
+    ]
+  },
+  workers: {
+    title: 'Factory Workers',
+    chinese: '工廠工人',
+    category: 'Industrial Labour Class',
+    body: "Hong Kong's post-war economic miracle was built on the labour of hundreds of thousands of migrants who staffed its factories. Working 12-hour shifts in textile mills, plastic flower workshops, and electronics assembly lines, these workers — predominantly women — earned wages that slowly lifted families out of poverty. Their collective identity, forged in the factory and the resettlement estate, became the backbone of modern Hong Kong working-class culture.",
+    stats: [
+      { num: '~600,000', label: 'Manufacturing workers, peak 1970s' },
+      { num: '16¢', label: 'Hourly wage, textile mill, 1955 (HKD)' }
+    ],
+    timeline: [
+      { year: '1950s', event: 'Refugee labour fuels rapid industrialisation in Kowloon.' },
+      { year: '1967', event: 'Leftist-inspired labour riots challenge colonial authority.' },
+      { year: '1980s', event: 'Factory jobs migrate to mainland China as HK deindustrialises.' }
+    ]
+  },
+  manu: {
+    title: 'Manufacturing Industry',
+    chinese: '製造業',
+    category: 'Economic Sector',
+    body: "Hong Kong's manufacturing sector, concentrated in Kowloon and the New Territories, was built almost entirely by migrant capital and labour. Shanghainese textile mills, Cantonese plastic factories, and electronics assembly plants created an export economy that sustained millions. The industry's reliance on cheap migrant labour and minimal regulation reflected the colonial government's laissez-faire economic philosophy.",
+    stats: [
+      { num: 'HK$2.3B', label: 'Export value, 1960 (textiles alone)' },
+      { num: '43%', label: 'Share of GDP, peak 1970s' }
+    ],
+    timeline: [
+      { year: '1950', event: 'Shanghainese capital establishes first large-scale textile mills in Tsuen Wan.' },
+      { year: '1970', event: 'HK becomes top global exporter of garments, toys, and electronics.' },
+      { year: '1990s', event: 'Manufacturing relocates to Pearl River Delta; HK pivots to finance.' }
+    ]
+  },
+  tang: {
+    title: 'Tang Clan (Punti)',
+    chinese: '鄧氏族人（本地人）',
+    category: 'Indigenous Walled Village Clan',
+    body: "The Tang clan is one of the Five Great Clans of the New Territories, with roots in Kam Tin dating to the Song dynasty (c. 1100 CE). Their walled village, Kat Hing Wai, is among the oldest continuously inhabited settlements in Hong Kong. The Tang maintained a sophisticated clan governance system based on the <em>Tso</em> (ancestral trust), which held communal land, funded education, and mediated disputes — a parallel legal system operating alongside British colonial law.",
+    stats: [
+      { num: '900+', label: 'Years in Kam Tin' },
+      { num: 'c. 1100 CE', label: 'Tang clan arrival in NT' }
+    ],
+    timeline: [
+      { year: '1100s', event: 'Tang clan migrates south and establishes Kam Tin settlement.' },
+      { year: '1637', event: 'Kat Hing Wai walled village fortified against piracy and rival clans.' },
+      { year: '1899', event: 'Tang elders lead armed resistance against British takeover of NT.' },
+      { year: '1984', event: 'Tang clan negotiates special indigenous land rights in pre-handover discussions.' }
+    ]
+  },
+  brit: {
+    title: 'British Administration (NT)',
+    chinese: '英國管治（新界）',
+    category: 'Colonial Authority',
+    body: "The administration of the New Territories differed fundamentally from Hong Kong Island and Kowloon. Recognising the strength of clan governance and the sensitivity of a leased territory, the British adopted a policy of indirect rule — preserving indigenous customs, land tenure systems, and clan courts. District Officers acted as mediators rather than direct rulers, creating a hybrid colonial-indigenous system unique in the British Empire.",
+    stats: [
+      { num: '99', label: 'Year lease, signed 1898' },
+      { num: '1899', label: 'Six-day armed resistance crushed' }
+    ],
+    timeline: [
+      { year: '1898', event: 'Convention of Peking: NT leased to Britain for 99 years.' },
+      { year: '1899', event: 'British forces suppress six-day indigenous uprising at Tai Po.' },
+      { year: '1900s', event: 'Block Crown Lease preserves clan land rights; indirect rule established.' }
+    ]
+  },
+  malay: {
+    title: 'Post-War New Migrants',
+    chinese: '戰後新移民',
+    category: 'Displacement Migration',
+    body: "The post-war decades brought waves of new migrants to the New Territories — former urban squatters displaced by development, mainland Chinese escaping political turmoil, and later, rural-urban migrants seeking factory work. Their arrival in traditionally clan-controlled villages disrupted centuries-old social hierarchies and accelerated the transformation of the NT from agricultural hinterland to suburban extension of the city.",
+    stats: [
+      { num: '~1M', label: 'NT population growth, 1950–1980' },
+      { num: '1970s', label: 'New Town programme begins' }
+    ],
+    timeline: [
+      { year: '1950s', event: 'Government resettlement schemes move squatters to NT new towns.' },
+      { year: '1973', event: 'New Town programme launches: Sha Tin, Tuen Mun, Fanling developed.' },
+      { year: '1980s', event: 'NT population surpasses urban Kowloon for first time.' }
+    ]
+  },
+  anc: {
+    title: 'Ancestor Veneration System',
+    chinese: '祖先崇拜體系',
+    category: 'Cultural Institution',
+    body: "Ancestor veneration was not merely a religious practice but the organisational backbone of NT clan society. The <em>Tso</em> (祖) — ancestral trust — held collective land in the names of founding ancestors, distributing income to male descendants and funding clan schools and ancestral halls. This system gave clans an extraordinary continuity, allowing them to resist both colonial encroachment and modern development pressures across many centuries.",
+    stats: [
+      { num: '500+', label: 'Ancestral halls in NT (est.)' },
+      { num: '1990s', label: 'Tso rights reaffirmed post-handover' }
+    ],
+    timeline: [
+      { year: '1100s', event: 'Clan Tso systems established by founding ancestors of Five Great Clans.' },
+      { year: '1910', event: 'Colonial government formally recognises Tso land trusts under NT ordinance.' },
+      { year: '1994', event: 'New Territories Land Ordinance preserves male-line inheritance despite gender equality pressure.' }
+    ]
+  },
+  viet: {
+    title: 'Vietnamese Refugees',
+    chinese: '越南難民',
+    category: 'Humanitarian Displacement',
+    body: "Following the fall of Saigon in April 1975, hundreds of thousands of Vietnamese fled by boat across the South China Sea. Hong Kong, as the nearest British territory, became a major first asylum port. At peak, over 200,000 Vietnamese were held in closed detention centres across the territory. Their stories — of escape, waiting, and uncertain futures — represent one of the most complex humanitarian episodes in Hong Kong's colonial history.",
+    stats: [
+      { num: '~200,000', label: 'Peak Vietnamese in HK, 1989' },
+      { num: '25 years', label: 'Duration of refugee crisis' }
+    ],
+    timeline: [
+      { year: '1975', event: 'Fall of Saigon: first boat arrivals reach Hong Kong.' },
+      { year: '1979', event: 'HK declared "port of first asylum" — all arrivals accepted temporarily.' },
+      { year: '1989', event: 'Closed-camp detention introduced; screening policy begins.' },
+      { year: '2000', event: 'Last Vietnamese detention centre closes; crisis officially ends.' }
+    ]
+  },
+  unhcr: {
+    title: 'UNHCR & International NGOs',
+    chinese: '聯合國難民署及國際組織',
+    category: 'Humanitarian Organisation',
+    body: "The United Nations High Commissioner for Refugees coordinated international response to the Vietnamese boat people crisis in Hong Kong. Working alongside NGOs like Médecins Sans Frontières and the Red Cross, UNHCR managed refugee status determination, resettlement processing, and conditions in detention camps. The HK crisis became a defining moment for international refugee law and tested the limits of colonial humanitarian obligation.",
+    stats: [
+      { num: '143,700', label: 'Vietnamese resettled from HK, 1975–1999' },
+      { num: '67,000', label: 'Repatriated to Vietnam' }
+    ],
+    timeline: [
+      { year: '1975', event: 'UNHCR establishes HK field office to manage initial arrivals.' },
+      { year: '1979', event: 'International conference on Indochinese refugees; resettlement quotas agreed.' },
+      { year: '1988', event: 'Comprehensive Plan of Action introduced — screening replaces automatic asylum.' }
+    ]
+  },
+  govt: {
+    title: 'HK Colonial Government',
+    chinese: '香港殖民地政府',
+    category: 'Colonial Authority',
+    body: "The Hong Kong colonial government operated on a philosophy of minimal intervention in social and economic affairs, relying on Chinese community leaders, clan associations, and business guilds to maintain social order. The Governor, appointed by London, governed through an appointed Executive Council with no elected legislature until the final years of British rule. This \"administrative state\" model was simultaneously praised for its efficiency and criticised for its democratic deficit.",
+    stats: [
+      { num: '28', label: 'Colonial Governors, 1843–1997' },
+      { num: '1991', label: 'First direct LegCo elections held' }
+    ],
+    timeline: [
+      { year: '1843', event: 'Sir Henry Pottinger becomes first Governor of Hong Kong.' },
+      { year: '1953', event: 'Shek Kip Mei fire forces government into mass public housing provision.' },
+      { year: '1984', event: 'Joint Declaration signed; political reform accelerates under Patten.' },
+      { year: '1997', event: 'Chris Patten lowers the flag; 155 years of colonial rule ends.' }
+    ]
+  },
+  chin: {
+    title: 'Mainland Chinese Community',
+    chinese: '內地中國人',
+    category: 'Cross-Border Migration',
+    body: "Throughout the colonial period, Hong Kong's population was constantly replenished by mainland Chinese migrants escaping war, famine, and political upheaval. The relationship between Hong Kong Chinese and mainland Chinese was complex — bound by shared ancestry yet divided by radically different political and cultural experiences. In the Kowloon City context, mainland Chinese shared linguistic and cultural ties with Vietnamese of Chinese descent, creating unexpected cross-community bonds.",
+    stats: [
+      { num: '~1M', label: 'Mainland arrivals, 1949–1951' },
+      { num: '150/day', label: 'Legal mainland immigrants, 1980s quota' }
+    ],
+    timeline: [
+      { year: '1949', event: 'PRC founded — approximately 700,000 flee to HK within two years.' },
+      { year: '1962', event: 'Great Leap famine drives mass illegal border crossings.' },
+      { year: '1980', event: 'Touch Base Policy abolished; all illegal entrants now repatriated.' }
+    ]
+  },
+  squatter: {
+    title: 'Squatter Refugees',
+    chinese: '寮屋難民',
+    category: 'Displaced Persons',
+    body: "By the early 1950s, over 300,000 people lived in illegal squatter settlements on the hillsides of Kowloon — mostly post-1949 mainland Chinese refugees. Built from wood, corrugated iron, and salvage materials, these settlements lacked running water, sanitation, and legal tenure. The communities within them were, however, intensely organised: mutual aid societies, informal schools, and clan networks provided basic welfare. The Christmas Day 1953 fire at Shek Kip Mei changed everything.",
+    stats: [
+      { num: '300,000+', label: 'Squatter population, early 1950s' },
+      { num: '53,000', label: 'Made homeless by 1953 fire alone' }
+    ],
+    timeline: [
+      { year: '1945', event: 'Post-war refugees begin building hillside squatter settlements.' },
+      { year: '1949', event: 'PRC founding triggers second mass wave; squatter population doubles.' },
+      { year: '1953', event: 'Shek Kip Mei fire: government launches emergency resettlement programme.' },
+      { year: '1970s', event: 'Final squatter clearances as public housing absorbs displaced populations.' }
+    ]
+  },
+  church: {
+    title: 'Churches & NGOs',
+    chinese: '教會及非政府組織',
+    category: 'Civil Society',
+    body: "Christian missionaries — Catholic, Anglican, and Protestant — played an outsized role in providing welfare services to Hong Kong's migrant poor. Mission schools educated generations of working-class children; mission clinics provided basic healthcare; church welfare organisations distributed food and clothing. Their work filled the gap left by a colonial government committed to minimal social expenditure, creating a hybrid welfare state funded by foreign charity and religious mission.",
+    stats: [
+      { num: '200+', label: 'Mission schools operating by 1960s' },
+      { num: '1843', event: 'First missionary school founded in HK' }
+    ],
+    timeline: [
+      { year: '1843', event: 'London Missionary Society opens first school for Chinese children.' },
+      { year: '1950s', event: 'Church organisations absorb mainland refugees; welfare services expand rapidly.' },
+      { year: '1970s', event: 'Government gradually takes over social services previously run by NGOs.' }
+    ]
+  },
+  factory: {
+    title: 'Kowloon Factories',
+    chinese: '九龍工廠',
+    category: 'Industrial Infrastructure',
+    body: "The flatlands of Kowloon — especially Kwun Tong, San Po Kong, and areas near Shek Kip Mei — became Hong Kong's industrial heartland in the 1950s and 1960s. Textile mills, plastic factories, wig workshops, and electronics assembly plants drew hundreds of thousands of workers from the surrounding resettlement estates. The proximity of public housing to factory sites was no coincidence: the colonial government designed resettlement policy partly to ensure a reliable industrial labour supply.",
+    stats: [
+      { num: '~16,000', label: 'Factories in HK, peak 1970s' },
+      { num: '1950s–80s', label: 'Industrial golden age' }
+    ],
+    timeline: [
+      { year: '1954', event: 'First Kwun Tong industrial estate opens adjacent to new resettlement blocks.' },
+      { year: '1960s', event: 'HK plastic flowers and wigs become global export phenomena.' },
+      { year: '1979', event: 'China opens; factories begin relocating across border to Shenzhen.' }
+    ]
+  }
+};
+
+// ── DRAWER FUNCTIONS ──
+function openDrawer(nodeId) {
+  var profile = communityProfiles[nodeId];
+  if (!profile) return;
+
+  var statsHTML = '';
+  profile.stats.forEach(function(s) {
+    statsHTML += '<div class="stat-box">'
+      + '<div class="stat-num">' + s.num + '</div>'
+      + '<div class="stat-label">' + s.label + '</div>'
+      + '</div>';
+  });
+
+  var timelineHTML = '';
+  profile.timeline.forEach(function(t) {
+    timelineHTML += '<div class="dtl-item">'
+      + '<div class="dtl-year">' + t.year + '</div>'
+      + '<div class="dtl-event">' + t.event + '</div>'
+      + '</div>';
+  });
+
+  document.getElementById('drawer-inner').innerHTML =
+    '<div class="drawer-file-tag">Community Archive</div>'
+    + '<div class="drawer-title">' + profile.title + '</div>'
+    + '<div class="drawer-subtitle">' + profile.chinese + ' &nbsp;·&nbsp; ' + profile.category + '</div>'
+    + '<hr class="drawer-divider"/>'
+    + '<div class="drawer-section-title">Background</div>'
+    + '<div class="drawer-body">' + profile.body + '</div>'
+    + '<div class="drawer-section-title">Key Figures</div>'
+    + '<div class="drawer-stats">' + statsHTML + '</div>'
+    + '<div class="drawer-section-title">Timeline</div>'
+    + '<div class="drawer-timeline">' + timelineHTML + '</div>';
+
+  document.getElementById('archive-drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('archive-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+}
+
 </script>
 </body>
 </html>
